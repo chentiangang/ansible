@@ -1,0 +1,13 @@
+- name: copy java_status.sh 
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: 'java_status.sh', dest: '/tmp/' }
+    - { src: 'userparameter_java.conf', dest: '/etc/zabbix/zabbix_agentd.d/' }
+  notify: restart zabbix-agent
+
+- name: add sudo priv
+  lineinfile:
+    path: /etc/sudoers
+    line: 'zabbix  ALL=(ALL)       NOPASSWD: /bin/bash /tmp/java_status.sh * *'

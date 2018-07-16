@@ -1,0 +1,14 @@
+- name: restart zabbix-server
+  service: name=zabbix-server state=restarted
+
+- name: restart zabbix-agent
+  service: name=zabbix-agent state=restarted
+
+- name: restart zabbix-java-gateway
+  service: name=zabbix-java-gateway state=restarted
+
+- name: restart httpd
+  service: name=httpd state=restarted
+
+- name: import mysql data
+  shell: "cd /usr/share/doc/zabbix-server-mysql-{{ version }} && zcat create.sql.gz | /usr/local/mysql/bin/mysql -uroot -p717692cd578d zabbix"

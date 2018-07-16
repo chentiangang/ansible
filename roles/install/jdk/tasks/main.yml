@@ -1,0 +1,36 @@
+- name: copy jdk
+  copy: 
+    src: "{{ jdk_version }}.tar.gz"
+    dest: /usr/local/src/
+
+- name: create install dir
+  file:
+    path: /application
+    state: directory
+
+- name: unarchive jdk
+  unarchive:
+    src: "/usr/local/src/{{ jdk_version }}.tar.gz"
+    dest: /application
+    remote_src: yes
+
+- name: link jdk
+  file:
+    src: "/application/jdk1.8.0_131"
+    dest: /application/jdk
+    state: link
+
+- name: add profile
+  lineinfile:
+    path: /etc/profile
+    line: "{{ item }}"
+  with_items:
+    - 'export JAVA_HOME=/application/jdk'
+    - 'export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH'
+    - 'export CLASSPATH=.$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$JAVA_HOME/lib/tools.jar'
+
+- name: yum install rngd
+  yum: name=rng-tools state=present
+ 
+- name: started rngd
+  service: name=rngd state=started enabled=yes

@@ -1,0 +1,2 @@
+nginx_version: nginx-1.12.2
+conf_dir: /application/nginx/conf

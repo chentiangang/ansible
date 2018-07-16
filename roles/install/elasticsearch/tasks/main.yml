@@ -1,0 +1,44 @@
+- name: copy elasticsearch
+  copy:
+    src: elasticsearch-6.1.2.rpm
+    dest: /usr/local/src/
+
+- name: link java
+  file:
+    src: /application/jdk/bin/java
+    dest: /usr/local/sbin/java
+    state: link
+
+- name: yum install elasticsearch
+  yum: 
+    name: /usr/local/src/elasticsearch-6.1.2.rpm
+    state: present
+  notify: install plugin
+
+- name: start elasticsearch
+  service: name=elasticsearch state=started enabled=yes
+
+- name: configure elasticsearch
+  lineinfile:
+    path: "{{ item.path }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  loop:
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: 'cluster.name:', line: 'cluster.name: search-cluster' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: 'node.name:', line: 'node.name: {{ ansible_hostname }}' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: 'network.host:', line: 'network.host: 0.0.0.0' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: 'http.port:', line: 'http.port: 9200' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: '#discovery.zen.minimum_master_nodes:', line: 'discovery.zen.minimum_master_nodes: 2' }
+    - { path: '/etc/elasticsearch/elasticsearch.yml', regexp: 'discovery.zen.p', line: 'discovery.zen.ping.unicast.hosts: ["10.0.0.107", "10.0.1.107"]' }
+    - { path: '/etc/elasticsearch/jvm.options', regexp: '^-Xms', line: '-Xms5g' }
+    - { path: '/etc/elasticsearch/jvm.options', regexp: '^-Xmx', line: '-Xmx5g' }
+  notify: restart elasticsearch
+
+- name: config elasticsearch
+  lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    line: "{{ item }}"
+  loop:
+    - 'http.cors.enabled: true'
+    - 'http.cors.allow-origin: "*"'
+  notify: restart elasticsearch

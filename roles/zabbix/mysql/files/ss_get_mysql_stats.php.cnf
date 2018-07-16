@@ -1,0 +1,4 @@
+<?php
+$mysql_user='xxx';
+$mysql_pass='xxx';
+$mysql_socket='/etc/mysql.sock';

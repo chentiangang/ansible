@@ -1,0 +1,44 @@
+- name: test /application/tomcat exist
+  shell: test -d /application/tomcat
+  ignore_errors: yes
+  register: result
+
+- name: 解压文件
+  unarchive:
+    src: "apache-tomcat-{{ tomcat_version }}.tar.gz"
+    dest: "/application/"
+    creates: "apache-tomcat-{{ tomcat_version }}"
+  when: result.rc != 0
+
+- name: create link tomcat
+  file:
+    src: "/application/apache-tomcat-{{ tomcat_version }}"
+    dest: /application/tomcat
+    state: link
+
+- name: configure tomcat
+  copy: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }}
+  loop:
+    - { src: 'tomcatd', dest: '/etc/init.d/', mode: '0755' }
+    - { src: 'server.xml', dest: '/application/tomcat/conf/', mode: '0600' }
+    - { src: 'catalina.sh', dest: '/application/tomcat/bin/', mode: '0750' }
+  notify: restart tomcatd
+
+- name: insert '/etc/init.d/tmocatd start' to /etc/rc.local
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    line: "{{ item }}"
+    mode: 0755
+  loop:
+    - 'source /etc/profile'
+    - '/etc/init.d/tomcatd start'
+
+- name: "delete webapps/{{ item }}"
+  file:
+    path: "/application/tomcat/webapps/{{ item }}"
+    state: absent
+  loop:
+    - docs
+    - examples
+    - host-manager
+    - manager

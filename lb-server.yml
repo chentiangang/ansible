@@ -1,0 +1,7 @@
+---
+- hosts:
+  - lb-A1
+  - lb-B1
+  gather_facts: no
+  roles:
+    - config/lb-nginx

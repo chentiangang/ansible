@@ -1,0 +1,89 @@
+#!/bin/bash
+# Tomcat 启动脚本
+PATH=/application/jdk/bin:/application/jdk/jre/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+# stop or start or restart
+tomcat_dir="/application/tomcat"
+
+###########################################################
+###########################################################
+
+# 判断tomcat目录是否存在
+if [ -z "${tomcat_dir}" ];then
+    echo "ERROR: ${tomcat_dir} directory is not exists" && exit 1
+else
+    ls ${tomcat_dir} &> /dev/null
+    [ ! $? == 0 ] && echo "ERROR: ${tomcat_dir} directory is not exists" && exit 1
+fi
+
+###########################################################
+###########################################################
+
+# pid文件
+PIDFILE="/var/run/tomcat.pid"
+
+# 启动tomcat
+start(){
+   if [ -f $PIDFILE ];then
+   	echo "Warning: PID file ${PIDFILE} exists."
+   else
+       ${tomcat_dir}/bin/catalina.sh start
+       sleep 1
+       PID=`pgrep java`
+       printf "$PID" > ${PIDFILE}
+       echo "INFO: Starting tomcat server..."
+   fi
+}
+
+# 停止tomcat
+stop(){
+    if [ -s $PIDFILE ];then
+        PID=`cat ${PIDFILE}`
+    	echo "INFO: Stopping ..."
+    	kill -9 $PID 
+        rm -rf  ${PIDFILE} ${tomcat_dir}/work/*
+        sleep 1
+    	if [ -x /proc/${PID} ];then
+            echo "INFO: Waiting for Tomcat to stop ..."
+    	    kill -9 $PID
+            sleep 1
+    	fi
+    	echo "INFO: Tomcat stopped."
+    else
+        echo "Warning: $PIDFILE does not exist, tomcat is not running"
+    fi
+}
+
+# 重启tomcat
+restart(){
+    if [  -f $PIDFILE ];then
+        PID=`cat ${PIDFILE}`
+    	kill -9 $PID 
+        rm -rf ${PIDFILE}  ${tomcat_dir}/work/*
+        sleep 1
+    	if [ -x /proc/${PID} ];then
+            echo "INFO: waiting for Tomcat to stop ..."
+    	    kill -9 $PID
+    	    sleep 1
+    	fi
+    	echo "INFO: Tomcat stopped."
+   # 启动tomcat
+       	${tomcat_dir}/bin/catalina.sh start
+        sleep 1
+       	PID=`pgrep java`
+       	printf "$PID" > ${PIDFILE}
+    else
+   # 启动tomcat
+       	${tomcat_dir}/bin/catalina.sh start
+        sleep 1
+       	PID=`pgrep java`
+       	printf "$PID" > ${PIDFILE}
+    fi
+}
+
+case "$1" in
+start) start;;
+stop) stop;;
+restart) restart;;
+*) echo $"Usage: $0 { start | stop | restart }";exit 1;;
+esac

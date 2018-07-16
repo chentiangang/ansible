@@ -1,0 +1,6 @@
+- name: reload nginx
+  service: name=nginx state=reloaded
+  delegate_to: "{{ item }}"
+  loop:
+    - lb-A1
+    - lb-B1

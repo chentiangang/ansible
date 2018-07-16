@@ -1,0 +1,21 @@
+- name: register date
+  shell: "date +%F -d '-1 day'"
+  register: result
+  
+- name: rename log file
+  shell: "mv /app/logs/{{ item.src }}.log {{ item.dest }} && systemctl reload nginx"
+  with_items:
+    - { src: 'f', dest: '/app/logs/{{ result.stdout }}-f.log' }
+    - { src: 'm_access', dest: '/app/logs/{{ result.stdout }}-m_access.log' }
+    - { src: 'template', dest: '/app/logs/{{ result.stdout }}-template.log' }
+    #- { src: 'manager/mboss', dest: '/opt/{{ result.stdout }}-mboss.log' }
+    #- { src: 'manager/mfinance', dest: '/opt/{{ result.stdout }}-mfinance.log' }
+    #- { src: 'manager/moms', dest: '/opt/{{ result.stdout }}-moms.log' }
+    #- { src: 'manager/mpop', dest: '/opt/{{ result.stdout }}-mpop.log' }
+    #- { src: 'manager/mproduct', dest: '/opt/{{ result.stdout }}-mproduct.log' }
+    #- { src: 'manager/mpromo', dest: '/opt/{{ result.stdout }}-mpromo.log' }
+    #- { src: 'manager/mrisk', dest: '/opt/{{ result.stdout }}-mrisk.log' }
+    #- { src: 'manager/muser', dest: '/opt/{{ result.stdout }}-muser.log' }
+    #
+#- name: remove history log
+#  shell: "cd /app/logs && find . -type f -name *.log -mtime +7 |xargs rm -f "

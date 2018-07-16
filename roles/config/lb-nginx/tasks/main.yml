@@ -1,0 +1,72 @@
+
+- name: create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - '/app/logs'
+    - '/app/logs/manager'
+    - '/application/nginx/conf/conf.d'
+    - '/application/nginx/conf/conf.d/upstream'
+    - '/application/nginx/conf/conf.d/web-manager'
+    - '/application/nginx/conf/conf.d/limit'
+  tags: release-skip
+
+- name: copy ip.conf 
+  copy:
+    src: conf.d/limit/ip.conf
+    dest: /application/nginx/conf/conf.d/limit/
+
+- name: copy nginx.conf file
+  copy:
+    src: nginx.conf
+    dest: /application/nginx/conf/nginx.conf
+  notify: reload nginx
+  tags: release-skip
+
+- name: copy conf.d file
+  copy:
+    src: "conf.d/{{ item }}"
+    dest: /application/nginx/conf/conf.d/
+  with_items:
+    - 'f.yoho8.com.conf'
+    - 'm.yoho8.com.conf'
+    - 'www.yoho8.com.conf'
+    - 'src-static.yoho8.com.conf'
+    - 'template.yoho8.com.conf'
+  notify: reload nginx
+  tags: release-skip
+
+- name: copy upstream file
+  copy:
+    src: "conf.d/upstream/{{ item }}"
+    dest: /application/nginx/conf/conf.d/upstream/
+  with_items:
+    - 'manager_upstream.conf'
+    - 'web_api_upstream.conf'
+  notify: reload nginx
+
+- name: copy web-manager file
+  copy:
+    src: "conf.d/web-manager/{{ item }}"
+    dest: /application/nginx/conf/conf.d/web-manager/
+  with_items:
+    - 'mboss.yoho8.com.conf'
+    - 'mfinance.yoho8.com.conf'
+    - 'moms.yoho8.com.conf'
+    - 'mproduct.yoho8.com.conf'
+    - 'mrisk.yoho8.com.conf'
+    - 'mbuyloan.yoho8.com.conf'
+    - 'mhome.yoho8.com.conf'
+    - 'mpop.yoho8.com.conf'
+    - 'mpromo.yoho8.com.conf'
+    - 'muser.yoho8.com.conf'
+    - 'mauth.yoho8.com.conf'
+    - 'mwallet.yoho8.com.conf'
+  notify: reload nginx
+  tags: release-skip
+
+- name: start nginx
+  service: name=nginx state=started enabled=yes
+  tags: release-skip

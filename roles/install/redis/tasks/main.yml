@@ -1,0 +1,50 @@
+- name: test /usr/local/redis exits
+  shell: test -d /usr/local/redis
+  ignore_errors: yes
+  register: result
+
+- name: 解压文件
+  unarchive:
+    src: redis-3.2.11.tar.gz
+    dest: /usr/local/src/
+  when: result.rc != 0
+
+- name: compile redis
+  shell: cd /usr/local/src/redis-3.2.11 && \
+         make PREFIX=/usr/local/redis install && \
+         cp utils/redis_init_script /etc/init.d/redis_6380
+  when: result.rc != 0
+
+- name: create dir /etc/redis
+  file:
+    path: /etc/redis
+    state: directory
+
+- name: copy redis.conf template
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: '6380.conf', dest: '/etc/redis/' }
+    - { src: 'redis_6380', dest: '/etc/init.d/' }
+  notify: restart redis
+
+- name: link redis-server /usr/local/bin/
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { src: '/usr/local/redis/bin/redis-server', dest: '/usr/local/bin/redis-server' }
+    - { src: '/usr/local/redis/bin/redis-cli', dest: '/usr/local/bin/redis-cli' }
+
+- name: /etc/init.d/redis port
+  replace:
+    path: /etc/init.d/redis_6380
+    regexp: '6379'
+    replace: '6380'
+
+- name: /etc/rc.local
+  lineinfile:
+    path: /etc/rc.local
+    line: "/usr/local/redis/bin/redis-server /etc/redis/6380.conf"

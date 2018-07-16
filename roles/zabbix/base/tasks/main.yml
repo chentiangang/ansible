@@ -1,0 +1,26 @@
+- name: install zabbix22-agent
+  yum: name={{ item }} state=latest
+  with_items: zabbix22-agent
+
+- name: template
+  template: src=zabbix_agentd.j2 dest=/etc/zabbix_agentd.conf owner=root group=root mode=0644
+  notify: restart zabbix-agent
+
+- name: create zabbix_agent.d
+  file:
+    path: /etc/zabbix/zabbix_agentd.d
+    state: directory
+
+- name: create userparameter_tcp.conf
+  file:
+    path: /etc/zabbix/zabbix_agentd.d/userparameter_tcp.conf
+    state: touch
+
+- name: item command
+  lineinfile:
+    path: /etc/zabbix/zabbix_agentd.d/userparameter_tcp.conf
+    line: 'UserParameter=tcp.status[*],ss -ant4 |grep -c "$1"'
+  notify: restart zabbix-agent
+
+- name: start zabbix-agent
+  service: name=zabbix-agent state=started enabled=yes

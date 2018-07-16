@@ -1,0 +1,23 @@
+- name: remove last pkg
+  shell: "ls /opt/*{{ pkgname }} |xargs -n1 |tail -1 |xargs mv -t /tmp/"
+
+- name: remove project
+  shell: "cd {{ pkgroot }} && rm -rf *"
+
+- name: register pkgname
+  shell: "ls /opt/*{{ pkgname }} |xargs -n1 |tail -1"
+  register: rollback_pkg
+
+- name: unarchive pkg
+  unarchive:
+    src: "/opt/{{ rollback_pkg.stdout }}"
+    dest: "{{ pkgroot }}"
+    remote_src: yes
+
+- name: restart main.sh
+  shell: ". /etc/profile && /bin/bash /application/jar/{{ project }}/bin/main.sh restart"
+  when: ansible_hostname | search("inner-api")
+
+- name: restart tomcatd
+  shell: ". /etc/profile && nohup /etc/init.d/tomcatd restart"
+  when: ansible_hostname | search("web-api|web-manager|job")

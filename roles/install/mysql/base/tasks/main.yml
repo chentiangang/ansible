@@ -1,0 +1,48 @@
+- name: yum install libaio
+  yum: name=libaio state=latest
+
+- name: Create mysql user
+  user:
+    name: mysql
+    shell: /sbin/nologin
+    createhome: no
+
+- name: Create basedir /app/logs
+  file:
+    path: /app/logs
+    state: directory
+    owner: mysql
+    group: mysql
+
+- name: copy mysql 
+  copy: 
+    src: mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz
+    dest: /usr/local/src/
+  
+- name: test dir exists
+  shell: "test -d /usr/local/mysql-5.7.22-linux-glibc2.12-x86_64"
+  ignore_errors: yes
+  register: result
+
+- name: unarchive mysql
+  unarchive:
+    src: "/usr/local/src/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz"
+    dest: "/usr/local/"
+    remote_src: yes
+    owner: mysql
+    group: mysql
+  when: result.rc != 0
+
+- name: link mysql
+  file:
+    src: "/usr/local/mysql-5.7.22-linux-glibc2.12-x86_64"
+    dest: /usr/local/mysql
+    state: link
+
+- name: add profile mysql path  and rc.local start
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { path: '/etc/profile', line: 'export PATH=/usr/local/mysql/bin:$PATH' }
+    - { path: '/etc/rc.local', line: '/usr/local/mysql/support-files/mysql.server start' }

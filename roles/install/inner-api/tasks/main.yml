@@ -1,0 +1,5 @@
+- name: create dir /application/jar/
+  file:
+    path: /application/jar
+    state: directory
+  when: ansible_hostname is search("inner-api")

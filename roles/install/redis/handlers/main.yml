@@ -1,0 +1,2 @@
+- name: restart redis
+  shell: /etc/init.d/redis_6380 stop && /etc/init.d/redis_6380 start

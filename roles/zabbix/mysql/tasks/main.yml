@@ -1,0 +1,30 @@
+- name: Copy percona plugin to /usr/local/src/
+  copy: src=percona-zabbix-templates-1.1.8-1.noarch.rpm dest=/usr/local/src/
+  tags: init
+
+- name: Yum install percona plugin
+  yum: 
+    name: /usr/local/src/percona-zabbix-templates-1.1.8-1.noarch.rpm 
+    state: present
+  tags: init
+
+- name: Yum install php php-mysql
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - php
+    - php-mysql
+
+- name: Config percona plugin
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    owner: zabbix
+  with_items:
+    - { src: 'get_mysql_stats_wrapper.sh', dest: '/var/lib/zabbix/percona/scripts', mode: '0700' }
+    - { src: 'ss_get_mysql_stats.php', dest: '/var/lib/zabbix/percona/scripts', mode: '0755' }
+    - { src: 'ss_get_mysql_stats.php.cnf', dest: '/var/lib/zabbix/percona/scripts', mode: '0600' }
+    - { src: 'userparameter_percona_mysql.conf', dest: '/etc/zabbix/zabbix_agentd.d', mode: '0644' }
+  notify: restart zabbix-agent

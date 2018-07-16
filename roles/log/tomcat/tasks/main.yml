@@ -1,0 +1,5 @@
+- name: Setup Facts             | ansible_hostname
+  setup: filter=ansible_hostname
+
+- name: Tomcat                  | delete logs/ -mtime +7 
+  shell: "find /application/tomcat/logs/ -type f -mtime +7 |xargs rm -f"

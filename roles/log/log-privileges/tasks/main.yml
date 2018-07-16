@@ -1,0 +1,22 @@
+- name: Facts
+  setup: filter=ansible_hostname
+
+- name: change log grants
+  file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { path: '/app/logs/{{ ansible_hostname[:-3] }}', mode: '0755' }
+    - { path: '/app/logs', mode: '0755' }
+    - { path: '/app', mode: '0755' }
+
+- name: change log privileges
+  shell: "chmod 644 /app/logs/{{ ansible_hostname[:-3] }}/*"
+
+#- name: change tomcat log
+#  file:
+#    path: "{{ item.path }}"
+#    mode: "{{ item.mode }}"
+#  with_items:
+#    - { path: '/application/tomcat/logs/catalina.out', mode: '0644' }
+#  when: ansible_hostname | search("job|web-manager|web-api")

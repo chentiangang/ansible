@@ -1,0 +1,5 @@
+---
+pkgname: "{{ ansible_hostname[:-3] }}.war"
+pkgroot: "/application/tomcat/webapps/ROOT/"
+project: "{{ ansible_hostname[:-3] }}"
+web_port: "8080"

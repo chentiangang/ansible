@@ -1,0 +1,5 @@
+---
+- hosts: "{{ host }}"
+  serial: 2
+  roles: 
+    - rollback

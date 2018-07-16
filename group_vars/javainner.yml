@@ -1,0 +1,5 @@
+---
+pkgname: "{{ ansible_hostname[:-3] }}.zip"
+pkgroot: "/application/jar/"
+project: "{{ ansible_hostname[:-3] }}"
+web_port: "20880"

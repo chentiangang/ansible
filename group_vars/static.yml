@@ -1,0 +1,5 @@
+---
+pkgname: "{{ ansible_hostname[3:-3] }}.tgz"
+pkgroot: "/data/{{ ansible_hostname[3:-3]}}/"
+project: "{{ ansible_hostname[3:-3] }}"
+web_port: "8080"

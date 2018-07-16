@@ -1,0 +1,15 @@
+- name: copy scripts template
+  template:
+    src: redis_status.sh
+    dest: /etc/zabbix/
+    mode: 0640
+    owner: zabbix
+    group: zabbix
+  notify: restart zabbix-agent
+
+
+- name: copy userparameter_redis.conf
+  copy:
+    src: userparameter_redis.conf
+    dest: /etc/zabbix/zabbix_agentd.d/
+  notify: restart zabbix-agent

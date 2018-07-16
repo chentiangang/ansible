@@ -1,0 +1,5 @@
+- name: init mysql
+  shell: "/usr/local/mysql/bin/mysqld --initialize --basedir=/usr/local/mysql/ --datadir=/usr/local/mysql/data --user=mysql &> /root/.pwd"
+
+- name: start mysql
+  shell: "/usr/local/mysql/support-files/mysql.server start"

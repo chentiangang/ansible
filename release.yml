@@ -1,0 +1,5 @@
+---
+- hosts: "{{ host }}"
+  serial: 1
+  roles: 
+    - release/deploy

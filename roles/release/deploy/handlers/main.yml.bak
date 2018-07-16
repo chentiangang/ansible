@@ -1,0 +1,36 @@
+- name: 2.remove project
+  shell: "cd {{ pkgroot }} && rm -rf *"
+  listen: "release web service"
+
+- name: 3.unarchive pkg
+  unarchive:
+    src: "/tmp/{{ pkgname }}"
+    dest: "{{ pkgroot }}"
+    remote_src: yes
+  listen: "release web service"
+
+- name: 4.backup /tmp/pkg
+  copy:
+    remote_src: yes
+    src: /tmp/{{ pkgname }}
+    dest: /opt/{{ backup_pkgname.stdout }}
+    mode: 0640
+  listen: "release web service"
+
+- name: 5.remove backup
+  shell: "cd /opt/ && ls -r *{{ pkgname }} | awk 'NR>10' |xargs rm -f"
+  listen: "release web service"
+
+- name: 6.restart main.sh
+  shell: ". /etc/profile && /bin/bash /application/jar/{{ project }}/bin/main.sh restart"
+  when: ansible_hostname is search("inner-api")
+  listen: "release web service"
+
+- name: 6.restart tomcatd
+  shell: ". /etc/profile && nohup /etc/init.d/tomcatd restart"
+  when: ansible_hostname is search("web-api|web-manager|job")
+  listen: "release web service"
+
+- name: wait for web to start
+  wait_for: port={{ web_port }} state=started delay=3 timeout=15
+  listen: "release web service"

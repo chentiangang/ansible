@@ -1,0 +1,4 @@
+- name: copy my.cnf template
+  template:
+    src: my.cnf
+    dest: /etc/

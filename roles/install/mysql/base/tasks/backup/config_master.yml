@@ -1,0 +1,29 @@
+---
+- hosts:
+  - db-master-oms-A
+  - db-master-product-A
+  - db-master-risk-funding-finance-A
+  - db-master-buyloan-A
+  - db-master-user-pay-A
+  handlers:
+    - name: change master server-id
+      shell: id=`hostname -I |awk -F. '{print \$4}'`;sed -ri "s#server-id(.*)= 1#server-id\1= ${id}#g" /etc/my.cnf
+      when: ansible_hostname | search("master")
+
+    - name: restart mysqld
+      shell: /usr/local/mysql/support-files/mysql.server restart
+
+  tasks:
+#  - name:  config jinja2 my.cnf.master mysql
+#    template:
+#      src: /etc/ansible/roles/mysql/templates/my.cnf.master
+#      dest: /etc/my.cnf
+#      backup: true
+#    notify: 
+#      - change master server-id
+#      - restart mysql
+
+  - name: create dir /app/logs
+    file: state=directory recurse=yes path=/app/logs owner=mysql group=mysql
+    notify:
+      - restart mysqld

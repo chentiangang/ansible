@@ -1,0 +1,26 @@
+- name: add repo
+  copy:
+    src: mongodb-org-3.4.repo
+    dest: /etc/yum.repos.d/
+    
+
+- name: yum install 3.4
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - mongodb-org
+    - mongodb-org-server
+    - mongodb-org-shell
+    - mongodb-org-mongos
+    - mongodb-org-tools
+
+- name: start mongodb
+  service: name=mongod state=started enabled=yes
+
+- name: configure mongodb
+  lineinfile:
+    path: /etc/mongod.conf
+    regexp: 'bindIp:'
+    line: '  bindIp: 10.0.2.151'
+  notify: restart mongodb

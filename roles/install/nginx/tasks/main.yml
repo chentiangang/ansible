@@ -1,0 +1,59 @@
+- name: yum install pcre-devel openssl-devel
+  yum: name={{ item }} state=present
+  loop:
+    - pcre-devel
+    - openssl-devel
+
+- name: useradd www
+  user:
+    name: www
+    createhome: no
+    shell: /sbin/nologin 
+
+- name: 解压文件
+  unarchive:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: "{{ item.remote_src }}"
+  loop:
+    - { src: 'http://nginx.org/download/{{ nginx_version }}.tar.gz', dest: '/usr/local/src', remote_src: 'yes' }
+    - { src: 'v0.61.tar.gz', dest: '/usr/local/src', remote_src: 'no' }
+
+
+- name: test /application/nginx exits
+  shell: "test -d /application/{{ nginx_version }}"
+  ignore_errors: yes
+  register: result
+
+- name: install nginx
+  shell: cd /usr/local/src/{{ nginx_version }} && \
+         ./configure --user=www --group=www --prefix=/application/{{ nginx_version }} \
+         --add-module=/usr/local/src/echo-nginx-module-0.61 \
+         --with-http_stub_status_module \
+         --with-http_ssl_module \
+         --with-http_realip_module && \
+         make && make install
+  when: result.rc != 0
+
+- name: link nginx
+  file:
+    src: /application/{{ nginx_version }}
+    dest: /application/nginx
+    state: link
+
+- name: create nginx conf.d
+  file: path={{ item }} state=directory mode=0755
+  loop:
+    - /{{ conf_dir }}/conf.d
+    - /app/logs
+
+- name: copy nginx.service
+  copy: src=nginx.service dest=/usr/lib/systemd/system/nginx.service
+
+- name: copy nginx.vim
+  copy: src=nginx.vim dest=/root/.vim/syntax/
+
+- name: /usr/share/vim/vim74/filetype.vim nginx
+  lineinfile:
+    path: /usr/share/vim/vim74/filetype.vim
+    line: 'au BufRead,BufNewFile /application/nginx/conf/conf.d/*.conf,/application/nginx/conf/*.conf,*.conf,conf/*.conf set ft=nginx'

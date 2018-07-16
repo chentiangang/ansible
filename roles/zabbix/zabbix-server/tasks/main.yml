@@ -1,0 +1,44 @@
+- name: yum install zabbix 3.4 repo
+  yum:
+    name: http://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-release-3.4-2.el7.noarch.rpm
+    state: present
+
+- name: yum install zabbix-server
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - 'zabbix-server-mysql'
+    - 'zabbix-web-mysql'
+    - 'zabbix-java-gateway'
+  notify: import mysql data
+
+- name: config zabbix
+  lineinfile:
+    regexp: "{{ item.regexp }}"
+    path: /etc/zabbix/zabbix_server.conf
+    line: "{{ item.line }}"
+  loop:
+    - { regexp: '^DBHost=', line: 'DBHost=localhost' }
+    - { regexp: '^DBName=', line: 'DBName=zabbix' }
+    - { regexp: '^DBUser=', line: 'DBUser=zabbix' }
+    - { regexp: '^DBPassword=', line: 'DBPassword=zabbix' }
+  notify: restart zabbix-server
+
+- name: config php
+  lineinfile:
+    regexp: "{{ item.regexp }}"
+    path: /etc/httpd/conf.d/zabbix.conf
+    line: "{{ item.line }}"
+  loop:
+    - { regexp: '^# php_value date.timezone', line: 'php_value date.timezone Asia/Shanghai' }
+  notify: restart httpd
+
+- name: start httpd
+  service: name=httpd state=started
+
+- name: start zabbix-server
+  service: name=zabbix-server state=started
+
+- name: start zabbix-java-gateway
+  service: name=zabbix-java-gateway state=started
