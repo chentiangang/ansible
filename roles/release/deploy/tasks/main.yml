@@ -43,6 +43,7 @@
 
 - name: start rngd
   service: name=rngd state=started enabled=yes
+  when: ansible_hostname is search("web-api|web-manager|job|inner-api")
 
 - name: restart main.sh
   shell: ". /etc/profile && /bin/bash /application/jar/{{ project }}/bin/main.sh restart"
@@ -52,12 +53,12 @@
   shell: ". /etc/profile && nohup /etc/init.d/tomcatd restart"
   when: ansible_hostname is search("web-api|web-manager|job")
 
+- name: wait for web to start
+  wait_for: port={{ web_port }} state=started delay=2 timeout=10
+
 - name: waiting web running...
   pause: seconds=15
   when: ansible_hostname is search("web-api")
-
-- name: wait for web to start
-  wait_for: port={{ web_port }} state=started delay=2 timeout=10
 
 - name: enable nginx upstream
   replace:
