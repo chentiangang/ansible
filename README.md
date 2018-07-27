@@ -604,9 +604,9 @@ cat /etc/ansible/install-tomcat.yml
        when: ansible_os_family == 'Debian'
 ```
 ###	变量注册
-  变量注册的用途是运行命令并使改命令的结果保存到变量中，结果因模块而异。 使用-v 执行playbook时将显示结果的可能值。
+变量注册的用途是运行命令并使改命令的结果保存到变量中，结果因模块而异。 使用-v 执行playbook时将显示结果的可能值。
+`register`关键字决定保存结果的变量。结果变量可用于模板，操作行或when语句。它看起来像这样（显然，这是一个简单的例子）：
 
-'register'关键字决定保存结果的变量。结果变量可用于模板，操作行或when语句。它看起来像这样（显然，这是一个简单的例子）：
 ```yaml
 tasks:
   - name: register variables
@@ -889,7 +889,7 @@ ansible-playbook playbook.yml --start-at-task="install packages"
   file: path=/etc/rc.d/rc.local mode=0755
 ```
 ##	部署tomcat
-####安装jdk
+#### 安装jdk
 ```sh
 cat /etc/ansible/roles/install/jdk/tasks/main.yml
 ```
@@ -931,7 +931,7 @@ cat /etc/ansible/roles/install/jdk/tasks/main.yml
 - name: started rngd
   service: name=rngd state=started enabled=yes
 ```
-####安装tomcat
+#### 安装tomcat
 ```sh
 cat /etc/ansible/roles/install/tomcat/tasks/main.yml
 ```
