@@ -9,7 +9,7 @@
 需要epel源
 ```sh
 wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
-yun install ansible -y
+yum install ansible -y
 ```
 分发密钥
 ```sh
