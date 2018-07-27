@@ -563,11 +563,11 @@ tasks:
     when: result is skipped
 ```
 
-##	条件判断
-    通常playbook的结果可能取决于变量的值，Facts或先前的任务结果。在某些情况下，变量的值可能取决于其他变量。
+## 条件判断
+通常playbook的结果可能取决于变量的值，Facts或先前的任务结果。在某些情况下，变量的值可能取决于其他变量。
 
-###	when语句
-    有时候你会想要跳过特定主机上的特定步骤。如果操作系统是特定版本，在Ansible中使用when语句很容易做到这一点，该子句包含一个没有双花括号的原始jinja2表达式。如:
+### when语句
+有时候你会想要跳过特定主机上的特定步骤。如果操作系统是特定版本，在Ansible中使用when语句很容易做到这一点，该子句包含一个没有双花括号的原始jinja2表达式。如:
 ```yaml
 tasks:
   - name: "shut down Debian flavored systems"
