@@ -1,4 +1,4 @@
-- name: disable nginx upstream
+- name: disable for "{{ ansible_hostname }}" nginx upstream pool
   replace:
     path: "/application/nginx/conf/conf.d/upstream/web_api_upstream.conf"
     regexp: '(server.*{{ ansible_eth0.ipv4.address }})'
@@ -12,7 +12,7 @@
 
 - meta: flush_handlers
 
-- name: register pkgname
+- name: register backup pkgname
   shell: echo "`date +%F-%H-%M`_{{ pkgname }}"
   register: backup_pkgname
 
@@ -25,13 +25,13 @@
 - name: remove project
   shell: "cd {{ pkgroot }} && rm -rf *"
 
-- name: unarchive pkg
+- name: unarchive pkg "{{ pkgname }}"
   unarchive:
     src: "/tmp/{{ pkgname }}"
     dest: "{{ pkgroot }}"
     remote_src: yes
 
-- name: backup /tmp/pkg
+- name: backup /tmp/pkg "{{ pkgname }}"
   copy:
     remote_src: yes
     src: /tmp/{{ pkgname }}
@@ -41,9 +41,9 @@
 - name: remove backup
   shell: "cd /opt/ && ls -r *{{ pkgname }} | awk 'NR>10' |xargs rm -f"
 
-- name: start rngd
+- name: start rngd service
   service: name=rngd state=started enabled=yes
-  when: ansible_hostname is search("web-api|web-manager|job|inner-api")
+  when: ansible_hostname is search("inner-api|web-api|web-manager|job")
 
 - name: restart main.sh
   shell: ". /etc/profile && /bin/bash /application/jar/{{ project }}/bin/main.sh restart"
@@ -53,14 +53,14 @@
   shell: ". /etc/profile && nohup /etc/init.d/tomcatd restart"
   when: ansible_hostname is search("web-api|web-manager|job")
 
-- name: wait for web to start
-  wait_for: port={{ web_port }} state=started delay=2 timeout=10
+- name: wait for service port exists ...
+  wait_for: port={{ web_port }} state=started delay=2 timeout=30
 
-- name: waiting web running...
+- name: waiting service running ...
   pause: seconds=15
   when: ansible_hostname is search("web-api")
 
-- name: enable nginx upstream
+- name: enable for "{{ ansible_hostname }}" nginx upstream pool
   replace:
     path: "/application/nginx/conf/conf.d/upstream/web_api_upstream.conf"
     regexp: '#(server.*{{ ansible_eth0.ipv4.address }}.*)'
