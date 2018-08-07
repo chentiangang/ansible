@@ -1,7 +1,7 @@
 #	ansible入门
 ##	关于ansible
 - Ansible是一款IT自动化工具。它可以配置管理，部署软件并编排更高级的任务，例如持续部署或零停机滚动升级。
-- Ansible的主要目标是简单易用。它还非常注重安全性和可靠性，具有最少的移动部件，使用OpenSSH进行传输（其他传输和拉模式作为替代方案），以及围绕人类可审计性设计的语言，即使那些不熟悉该程序。
+- Ansible的主要目标是简单易用。它还非常注重安全性和可靠性，具有最少的移动部件，使用OpenSSH进行传输（其他传输和拉模式作为替代方案），以及围绕人类可审计性设计的语言，即使那些不熟悉该程序的人。
 - 我们相信简单性与各种规模的环境相关，因此我们为各种类型的繁忙用户进行设计：开发人员，系统管理员，发布工程师，IT经理以及其他人员。Ansible适用于管理所有环境，从少数几个实例的小型设置到数千个实例的企业环境。
 - Ansible以无代理方式管理机器。永远不会有如何升级远程守护进程或由于守护进程被卸载而无法管理系统的问题。由于OpenSSH是同行评审最多的开源组件之一，安全风险大大降低。Ansible是分散的，它依赖于您现有的操作系​​统凭据来控制对远程机器的访问。如果需要，Ansible可以轻松连接Kerberos，LDAP和其他集中式身份验证管理系统。
 
@@ -931,17 +931,19 @@ cat /etc/ansible/roles/install/jdk/tasks/main.yml
 - name: started rngd
   service: name=rngd state=started enabled=yes
 ```
+
 #### 安装tomcat
 ```sh
 cat /etc/ansible/roles/install/tomcat/tasks/main.yml
 ```
+
 ```yaml
 - name: test /application/tomcat exist
   shell: test -d /application/tomcat
   ignore_errors: yes
   register: result
 
-- name: 解压文件
+- name: unarchive package
   unarchive:
     src: "apache-tomcat-{{ tomcat_version }}.tar.gz"
     dest: "/application/"
