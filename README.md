@@ -479,7 +479,7 @@ hostvars让您询仍另一个主机的变量，包括已收集的有关该主机
   vars:
     favcolor: blue
   vars_files:
-- /vars/external_vars.yml
+    - /vars/external_vars.yml
 
   tasks:
   - name: this is just a placeholder
