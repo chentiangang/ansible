@@ -302,7 +302,7 @@ handlers:
     - name: restart apache
       service:
         name: apache
-        state:restarted
+        state: restarted
       listen: "restart web services"
 
 tasks:
